@@ -10,3 +10,5 @@ __pycache__/
 *.sqlite
 .DS_Store
 .vercel
+WORKLOG.md
+REVIEWS.md

@@ -1,12 +1,12 @@
 """SolRadar API — DePIN analytics hub."""
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.database import init_db, get_session
+from db.database import init_db, engine, get_session
 from db.models import DePINNode, ProtocolMetrics
 from collectors.helium_collector import fetch_helium_stats
 from collectors.hivemapper_collector import fetch_hivemapper_stats
@@ -17,6 +17,7 @@ from collectors.render_collector import fetch_render_stats
 async def lifespan(application: FastAPI):
     await init_db()
     yield
+    await engine.dispose()
 
 
 app = FastAPI(title="SolRadar API", version="0.1.0", lifespan=lifespan)
@@ -178,7 +179,11 @@ async def trigger_collect(protocol: str):
 
     collector = collectors.get(protocol.lower())
     if not collector:
-        return {"error": f"Unknown protocol: {protocol}"}
+        raise HTTPException(status_code=400, detail=f"Unknown protocol: {protocol}")
 
-    data = await collector()
+    try:
+        data = await collector()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Collection failed: {str(e)}")
+
     return {"collected": True, "protocol": protocol, "result": data}

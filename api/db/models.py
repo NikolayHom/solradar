@@ -1,22 +1,9 @@
-from sqlalchemy import Column, String, Integer, Float, BigInteger, Boolean, Enum as SAEnum
+from sqlalchemy import Column, String, Integer, Float, BigInteger
 from sqlalchemy.orm import DeclarativeBase
-import enum
 
 
 class Base(DeclarativeBase):
     pass
-
-
-class ProtocolType(str, enum.Enum):
-    helium = "Helium"
-    hivemapper = "Hivemapper"
-    render = "Render"
-
-
-class NodeStatus(str, enum.Enum):
-    online = "Online"
-    offline = "Offline"
-    degraded = "Degraded"
 
 
 class DePINNode(Base):

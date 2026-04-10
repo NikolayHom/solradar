@@ -53,13 +53,13 @@ export function NodeList({ nodeList }: { nodeList: NodeData[] }) {
                   </span>
                 </td>
                 <td className="px-4 py-2 text-right text-[#9898a8]">
-                  {nodeItem.uptime_24h.toFixed(1)}%
+                  {(nodeItem.uptime_24h ?? 0).toFixed(1)}%
                 </td>
                 <td className="px-4 py-2 text-right text-white">
-                  ${nodeItem.earnings_24h.toFixed(2)}
+                  ${(nodeItem.earnings_24h ?? 0).toFixed(2)}
                 </td>
                 <td className="px-4 py-2 text-right text-white">
-                  ${nodeItem.earnings_30d.toFixed(2)}
+                  ${(nodeItem.earnings_30d ?? 0).toFixed(2)}
                 </td>
               </tr>
             ))}

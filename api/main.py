@@ -169,7 +169,7 @@ async def compare_protocols(wallet: str, db: AsyncSession = Depends(get_session)
 
 
 @app.post("/api/collect/{protocol}")
-async def trigger_collect(protocol: str):
+async def trigger_collect(protocol: str, db: AsyncSession = Depends(get_session)):
     """Manually trigger data collection for a protocol."""
     collectors = {
         "helium": fetch_helium_stats,
@@ -185,5 +185,27 @@ async def trigger_collect(protocol: str):
         data = await collector()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Collection failed: {str(e)}")
+
+    # Persist collected metrics into ProtocolMetrics table
+    import time
+    existing = await db.execute(
+        select(ProtocolMetrics).where(ProtocolMetrics.protocol == data.get("protocol", protocol))
+    )
+    row = existing.scalar_one_or_none()
+    if row:
+        row.total_nodes = data.get("total_nodes", 0)
+        row.active_nodes = data.get("active_nodes", 0)
+        row.total_rewards_24h = data.get("total_rewards_24h", 0)
+        row.last_updated = int(time.time())
+    else:
+        row = ProtocolMetrics(
+            protocol=data.get("protocol", protocol),
+            total_nodes=data.get("total_nodes", 0),
+            active_nodes=data.get("active_nodes", 0),
+            total_rewards_24h=data.get("total_rewards_24h", 0),
+            last_updated=int(time.time()),
+        )
+        db.add(row)
+    await db.commit()
 
     return {"collected": True, "protocol": protocol, "result": data}

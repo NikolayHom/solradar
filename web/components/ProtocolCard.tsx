@@ -47,20 +47,20 @@ export function ProtocolCard({ protocol }: { protocol: ProtocolData }) {
         <div>
           <span className="text-[#5a5a6e]">total nodes</span>
           <p className="text-white font-medium">
-            {protocol.total_nodes.toLocaleString()}
+            {(protocol.total_nodes ?? 0).toLocaleString()}
           </p>
         </div>
         <div>
           <span className="text-[#5a5a6e]">active</span>
           <p className="text-green-400 font-medium">
-            {protocol.active_nodes.toLocaleString()}
+            {(protocol.active_nodes ?? 0).toLocaleString()}
           </p>
         </div>
         {protocol.total_rewards_24h !== undefined && (
           <div>
             <span className="text-[#5a5a6e]">rewards 24h</span>
             <p className="text-white font-medium">
-              ${protocol.total_rewards_24h.toLocaleString()}
+              ${(protocol.total_rewards_24h ?? 0).toLocaleString()}
             </p>
           </div>
         )}
@@ -68,7 +68,7 @@ export function ProtocolCard({ protocol }: { protocol: ProtocolData }) {
           <div>
             <span className="text-[#5a5a6e]">avg/node</span>
             <p className="text-white font-medium">
-              ${protocol.avg_earnings_per_node.toFixed(2)}
+              ${(protocol.avg_earnings_per_node ?? 0).toFixed(2)}
             </p>
           </div>
         )}

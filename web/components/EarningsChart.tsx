@@ -42,7 +42,7 @@ export function EarningsChart({ earningsData }: { earningsData: UserEarnings }) 
         <div className="text-right">
           <p className="text-xs text-[#5a5a6e]">total 30d</p>
           <p className="text-sm font-semibold text-white">
-            ${earningsData.total_earnings_30d.toLocaleString()}
+            ${(earningsData.total_earnings_30d ?? 0).toLocaleString()}
           </p>
         </div>
       </div>

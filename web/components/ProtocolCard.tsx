@@ -12,6 +12,12 @@ const PROTOCOL_ICONS: Record<string, string> = {
   Render: "R",
 };
 
+const PROTOCOL_TOKENS: Record<string, string> = {
+  Helium: "HNT",
+  Hivemapper: "HONEY",
+  Render: "RNDR",
+};
+
 interface ProtocolData {
   name: string;
   total_nodes: number;
@@ -19,13 +25,21 @@ interface ProtocolData {
   total_rewards_24h?: number;
   avg_earnings_per_node?: number;
   token_price?: number;
+  network_coverage?: number;
   status?: string;
 }
 
 export function ProtocolCard({ protocol }: { protocol: ProtocolData }) {
   const colorClass = PROTOCOL_COLORS[protocol.name] || "bg-gray-500";
   const iconLetter = PROTOCOL_ICONS[protocol.name] || "?";
+  const tokenName = PROTOCOL_TOKENS[protocol.name] || "";
   const isPending = protocol.status === "pending";
+
+  // Active percentage
+  const activePercent =
+    protocol.total_nodes > 0
+      ? Math.round((protocol.active_nodes / protocol.total_nodes) * 100)
+      : 0;
 
   return (
     <div className="border border-[#2a2a38] rounded-lg bg-[#111118] p-4 hover:border-[#3a3a48] transition-colors">
@@ -37,8 +51,17 @@ export function ProtocolCard({ protocol }: { protocol: ProtocolData }) {
         </div>
         <div>
           <h3 className="text-sm font-semibold text-white">{protocol.name}</h3>
-          {isPending && (
+          {isPending ? (
             <span className="text-[10px] text-[#5a5a6e]">awaiting data</span>
+          ) : (
+            tokenName && (
+              <span className="text-[10px] text-[#5a5a6e]">
+                {tokenName}
+                {protocol.token_price != null && protocol.token_price > 0
+                  ? ` · $${protocol.token_price.toFixed(protocol.token_price < 1 ? 3 : 2)}`
+                  : ""}
+              </span>
+            )
           )}
         </div>
       </div>
@@ -54,25 +77,38 @@ export function ProtocolCard({ protocol }: { protocol: ProtocolData }) {
           <span className="text-[#5a5a6e]">active</span>
           <p className="text-green-400 font-medium">
             {(protocol.active_nodes ?? 0).toLocaleString()}
+            <span className="text-[#5a5a6e] ml-1">({activePercent}%)</span>
           </p>
         </div>
-        {protocol.total_rewards_24h !== undefined && (
+        {protocol.total_rewards_24h != null && protocol.total_rewards_24h > 0 && (
           <div>
             <span className="text-[#5a5a6e]">rewards 24h</span>
             <p className="text-white font-medium">
-              ${(protocol.total_rewards_24h ?? 0).toLocaleString()}
+              {(protocol.total_rewards_24h / 1_000_000).toFixed(2)} {tokenName}
             </p>
           </div>
         )}
-        {protocol.avg_earnings_per_node !== undefined && (
+        {protocol.network_coverage != null && protocol.network_coverage > 0 && (
           <div>
-            <span className="text-[#5a5a6e]">avg/node</span>
+            <span className="text-[#5a5a6e]">coverage</span>
             <p className="text-white font-medium">
-              ${(protocol.avg_earnings_per_node ?? 0).toFixed(2)}
+              {protocol.network_coverage.toFixed(1)}%
             </p>
           </div>
         )}
       </div>
+
+      {/* Active bar indicator */}
+      {!isPending && protocol.total_nodes > 0 && (
+        <div className="mt-3">
+          <div className="h-1 rounded-full bg-[#1a1a24] overflow-hidden">
+            <div
+              className={`h-full rounded-full ${colorClass}`}
+              style={{ width: `${activePercent}%`, opacity: 0.7 }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

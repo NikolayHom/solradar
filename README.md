@@ -15,7 +15,7 @@ Unified analytics dashboard for DePIN networks on Solana. Track your nodes, earn
 - **Dashboard** -- protocol overview cards, earnings breakdown (24h + 30d), network map
 - **Node Explorer** -- sortable table with status, uptime, and per-node earnings
 - **Earnings Charts** -- bar chart comparison across protocols with time range toggle
-- **Network Map** -- Mapbox visualization of node locations (requires token)
+- **Network Map** -- SVG global network map with Mercator projection
 
 ## How It Works
 
@@ -27,7 +27,7 @@ Unified analytics dashboard for DePIN networks on Solana. Track your nodes, earn
 
 | Layer | Tech |
 |-------|------|
-| Frontend | Next.js 14, Tailwind, Recharts, Mapbox GL |
+| Frontend | Next.js 14, Tailwind, Recharts, custom SVG map |
 | Backend | Python FastAPI, async collectors |
 | Storage | SQLite (local cache) |
 | Font | Instrument Sans |
@@ -47,8 +47,6 @@ npm run dev
 ```
 
 Frontend runs on `http://localhost:3000`, proxies API calls to `:8000`.
-
-Set `NEXT_PUBLIC_MAPBOX_TOKEN` in `.env` for map visualization.
 
 ## License
 

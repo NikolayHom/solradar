@@ -55,7 +55,7 @@ const FALLBACK_PROTOCOLS: ProtocolData[] = [
 
 async function fetchJson<T>(url: string, fallback: T): Promise<T> {
   try {
-    const resp = await fetch(url);
+    const resp = await fetch(url, { signal: AbortSignal.timeout(5000) });
     if (!resp.ok) return fallback;
     return await resp.json();
   } catch {

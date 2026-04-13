@@ -9,7 +9,3 @@ __pycache__/
 *.db
 *.sqlite
 .DS_Store
-.vercel
-WORKLOG.md
-REVIEWS.md
-REFERENCES.md

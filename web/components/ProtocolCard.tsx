@@ -1,21 +1,27 @@
 "use client";
 
 const PROTOCOL_COLORS: Record<string, string> = {
-  Helium: "bg-blue-500",
-  Hivemapper: "bg-orange-500",
-  Render: "bg-purple-500",
-};
-
-const PROTOCOL_ICONS: Record<string, string> = {
-  Helium: "H",
-  Hivemapper: "Hm",
-  Render: "R",
+  Helium: "#22d3ee",
+  Hivemapper: "#fb923c",
+  Render: "#a78bfa",
 };
 
 const PROTOCOL_TOKENS: Record<string, string> = {
   Helium: "HNT",
   Hivemapper: "HONEY",
   Render: "RNDR",
+};
+
+const PROTOCOL_GLYPHS: Record<string, string> = {
+  Helium: "◉",
+  Hivemapper: "◈",
+  Render: "▲",
+};
+
+const PROTOCOL_TAGLINE: Record<string, string> = {
+  Helium: "LoRaWAN · 5G · IoT routing",
+  Hivemapper: "decentralised street map",
+  Render: "GPU compute for creators",
 };
 
 interface ProtocolData {
@@ -30,84 +36,98 @@ interface ProtocolData {
 }
 
 export function ProtocolCard({ protocol }: { protocol: ProtocolData }) {
-  const colorClass = PROTOCOL_COLORS[protocol.name] || "bg-gray-500";
-  const iconLetter = PROTOCOL_ICONS[protocol.name] || "?";
+  const color = PROTOCOL_COLORS[protocol.name] || "#94a3b8";
+  const glyph = PROTOCOL_GLYPHS[protocol.name] || "◌";
   const tokenName = PROTOCOL_TOKENS[protocol.name] || "";
+  const tagline = PROTOCOL_TAGLINE[protocol.name] || "";
   const isPending = protocol.status === "pending";
 
-  // Active percentage
   const activePercent =
     protocol.total_nodes > 0
       ? Math.round((protocol.active_nodes / protocol.total_nodes) * 100)
       : 0;
 
   return (
-    <div className="border border-[#2a2a38] rounded-lg bg-[#111118] p-4 hover:border-[#3a3a48] transition-colors">
-      <div className="flex items-center gap-3 mb-3">
-        <div
-          className={`w-8 h-8 rounded-md ${colorClass} flex items-center justify-center text-white text-xs font-bold`}
-        >
-          {iconLetter}
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-white">{protocol.name}</h3>
-          {isPending ? (
-            <span className="text-[10px] text-[#5a5a6e]">awaiting data</span>
-          ) : (
-            tokenName && (
-              <span className="text-[10px] text-[#5a5a6e]">
-                {tokenName}
-                {protocol.token_price != null && protocol.token_price > 0
-                  ? ` · $${protocol.token_price.toFixed(protocol.token_price < 1 ? 3 : 2)}`
-                  : ""}
-              </span>
-            )
-          )}
-        </div>
-      </div>
+    <div className="panel reticle p-5 group relative overflow-hidden transition-colors hover:border-aqua">
+      <div
+        className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity pointer-events-none"
+        style={{ background: color }}
+      />
 
-      <div className="grid grid-cols-2 gap-2 text-xs">
+      <div className="flex items-start justify-between mb-4 relative">
         <div>
-          <span className="text-[#5a5a6e]">total nodes</span>
-          <p className="text-white font-medium">
-            {(protocol.total_nodes ?? 0).toLocaleString()}
-          </p>
-        </div>
-        <div>
-          <span className="text-[#5a5a6e]">active</span>
-          <p className="text-green-400 font-medium">
-            {(protocol.active_nodes ?? 0).toLocaleString()}
-            <span className="text-[#5a5a6e] ml-1">({activePercent}%)</span>
-          </p>
-        </div>
-        {protocol.total_rewards_24h != null && protocol.total_rewards_24h > 0 && (
-          <div>
-            <span className="text-[#5a5a6e]">rewards 24h</span>
-            <p className="text-white font-medium">
-              {(protocol.total_rewards_24h / 1_000_000).toFixed(2)} {tokenName}
-            </p>
+          <div className="flex items-baseline gap-2 mb-1">
+            <span className="text-xl" style={{ color }}>{glyph}</span>
+            <h3 className="text-[16px] font-semibold text-white">{protocol.name}</h3>
           </div>
-        )}
-        {protocol.network_coverage != null && protocol.network_coverage > 0 && (
-          <div>
-            <span className="text-[#5a5a6e]">coverage</span>
-            <p className="text-white font-medium">
-              {protocol.network_coverage.toFixed(1)}%
-            </p>
+          <p className="text-[10px] font-mono text-dimmer uppercase tracking-[0.15em]">
+            {tagline}
+          </p>
+        </div>
+        {tokenName && (
+          <div className="text-right">
+            <div className="text-[10px] font-mono text-dimmer uppercase tracking-[0.15em]">
+              {tokenName}
+            </div>
+            {protocol.token_price != null && protocol.token_price > 0 && (
+              <div className="text-[13px] font-mono text-white">
+                ${protocol.token_price.toFixed(protocol.token_price < 1 ? 3 : 2)}
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* Active bar indicator */}
-      {!isPending && protocol.total_nodes > 0 && (
-        <div className="mt-3">
-          <div className="h-1 rounded-full bg-[#1a1a24] overflow-hidden">
+      {isPending ? (
+        <div className="text-[11px] font-mono text-dimmer uppercase tracking-[0.15em] relative">
+          awaiting data
+        </div>
+      ) : (
+        <>
+          <div className="relative flex items-baseline justify-between mb-4">
+            <div>
+              <div className="text-[10px] font-mono text-dimmer uppercase tracking-[0.18em] mb-1">
+                nodes tracked
+              </div>
+              <div className="font-serif text-[34px] leading-none text-white">
+                {(protocol.total_nodes ?? 0).toLocaleString()}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] font-mono text-dimmer uppercase tracking-[0.18em] mb-1">
+                active
+              </div>
+              <div className="font-serif text-[22px] leading-none text-[color:var(--emerald)]">
+                {(protocol.active_nodes ?? 0).toLocaleString()}
+                <span className="text-[11px] font-mono text-dimmer ml-1">{activePercent}%</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="h-[2px] rounded-full bg-[rgba(255,255,255,0.05)] overflow-hidden mb-4 relative">
             <div
-              className={`h-full rounded-full ${colorClass}`}
-              style={{ width: `${activePercent}%`, opacity: 0.7 }}
+              className="h-full rounded-full transition-all duration-700"
+              style={{ width: `${activePercent}%`, background: color, boxShadow: `0 0 8px ${color}` }}
             />
           </div>
-        </div>
+
+          <div className="grid grid-cols-2 gap-3 text-[11px] font-mono relative">
+            {protocol.total_rewards_24h != null && protocol.total_rewards_24h > 0 && (
+              <div>
+                <div className="text-dimmer uppercase tracking-[0.15em] mb-0.5">rewards 24h</div>
+                <div className="text-white">
+                  {(protocol.total_rewards_24h / 1_000_000).toFixed(2)}M {tokenName}
+                </div>
+              </div>
+            )}
+            {protocol.network_coverage != null && protocol.network_coverage > 0 && (
+              <div>
+                <div className="text-dimmer uppercase tracking-[0.15em] mb-0.5">coverage</div>
+                <div className="text-white">{protocol.network_coverage.toFixed(1)}%</div>
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );

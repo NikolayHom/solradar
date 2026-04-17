@@ -8,20 +8,52 @@ DEMO_WALLETS = [
     "Hn9fW2kT5vL8qR3mA7xJ1bC4sP0dY6gE9u",
 ]
 
-# Dashcam cities with real coordinates
+# Dashcam cities with real coordinates — US-heavy + global corridors
 HIVEMAPPER_LOCATIONS = [
-    {"city": "San Francisco", "lat": 37.7749, "lng": -122.4194},
-    {"city": "Los Angeles", "lat": 34.0522, "lng": -118.2437},
-    {"city": "Austin", "lat": 30.2672, "lng": -97.7431},
-    {"city": "Miami", "lat": 25.7617, "lng": -80.1918},
-    {"city": "London", "lat": 51.5074, "lng": -0.1278},
-    {"city": "Berlin", "lat": 52.5200, "lng": 13.4050},
-    {"city": "Seoul", "lat": 37.5665, "lng": 126.9780},
-    {"city": "Dubai", "lat": 25.2048, "lng": 55.2708},
-    {"city": "Sao Paulo", "lat": -23.5505, "lng": -46.6333},
-    {"city": "New York", "lat": 40.7128, "lng": -74.0060},
-    {"city": "Portland", "lat": 45.5152, "lng": -122.6784},
-    {"city": "Chicago", "lat": 41.8781, "lng": -87.6298},
+    # US — dashcam heartland
+    {"city": "San Francisco",  "lat": 37.7749, "lng": -122.4194},
+    {"city": "Los Angeles",    "lat": 34.0522, "lng": -118.2437},
+    {"city": "San Diego",      "lat": 32.7157, "lng": -117.1611},
+    {"city": "Austin",         "lat": 30.2672, "lng":  -97.7431},
+    {"city": "Miami",          "lat": 25.7617, "lng":  -80.1918},
+    {"city": "New York",       "lat": 40.7128, "lng":  -74.0060},
+    {"city": "Portland",       "lat": 45.5152, "lng": -122.6784},
+    {"city": "Chicago",        "lat": 41.8781, "lng":  -87.6298},
+    {"city": "Seattle",        "lat": 47.6062, "lng": -122.3321},
+    {"city": "Boston",         "lat": 42.3601, "lng":  -71.0589},
+    {"city": "Washington DC",  "lat": 38.9072, "lng":  -77.0369},
+    {"city": "Denver",         "lat": 39.7392, "lng": -104.9903},
+    {"city": "Dallas",         "lat": 32.7767, "lng":  -96.7970},
+    {"city": "Houston",        "lat": 29.7604, "lng":  -95.3698},
+    {"city": "Atlanta",        "lat": 33.7490, "lng":  -84.3880},
+    {"city": "Phoenix",        "lat": 33.4484, "lng": -112.0740},
+    {"city": "Nashville",      "lat": 36.1627, "lng":  -86.7816},
+    {"city": "Orlando",        "lat": 28.5383, "lng":  -81.3792},
+    {"city": "Philadelphia",   "lat": 39.9526, "lng":  -75.1652},
+    {"city": "Salt Lake City", "lat": 40.7608, "lng": -111.8910},
+    # Canada
+    {"city": "Toronto",        "lat": 43.6532, "lng":  -79.3832},
+    {"city": "Vancouver",      "lat": 49.2827, "lng": -123.1207},
+    # LATAM
+    {"city": "Mexico City",    "lat": 19.4326, "lng":  -99.1332},
+    {"city": "São Paulo",      "lat":-23.5505, "lng":  -46.6333},
+    {"city": "Buenos Aires",   "lat":-34.6037, "lng":  -58.3816},
+    # EU corridor
+    {"city": "London",         "lat": 51.5074, "lng":   -0.1278},
+    {"city": "Paris",          "lat": 48.8566, "lng":    2.3522},
+    {"city": "Berlin",         "lat": 52.5200, "lng":   13.4050},
+    {"city": "Amsterdam",      "lat": 52.3676, "lng":    4.9041},
+    {"city": "Madrid",         "lat": 40.4168, "lng":   -3.7038},
+    {"city": "Milan",          "lat": 45.4642, "lng":    9.1900},
+    {"city": "Warsaw",         "lat": 52.2297, "lng":   21.0122},
+    # Asia / Gulf
+    {"city": "Seoul",          "lat": 37.5665, "lng":  126.9780},
+    {"city": "Tokyo",          "lat": 35.6762, "lng":  139.6503},
+    {"city": "Dubai",          "lat": 25.2048, "lng":   55.2708},
+    {"city": "Bangalore",      "lat": 12.9716, "lng":   77.5946},
+    # Oceania
+    {"city": "Sydney",         "lat":-33.8688, "lng":  151.2093},
+    {"city": "Melbourne",      "lat":-37.8136, "lng":  144.9631},
 ]
 
 CAMERA_MODELS = [
@@ -36,9 +68,10 @@ def _build_hivemapper_nodes() -> list[dict]:
     """Build realistic Hivemapper dashcam device entries."""
     random.seed(77)
     nodes = []
-    paused_indices = {3, 9}
+    paused_indices = {3, 9, 14, 21, 27, 33, 36}
 
-    for i in range(12):
+    total = len(HIVEMAPPER_LOCATIONS)
+    for i in range(total):
         loc = HIVEMAPPER_LOCATIONS[i]
         is_paused = i in paused_indices
         wallet_idx = i % len(DEMO_WALLETS)

@@ -23,26 +23,76 @@ HOTSPOT_ANIMALS = [
     "fox", "elk", "lynx", "hawk", "bear",
 ]
 
-# Real city coordinates for node placement
+# Real city coordinates for node placement — global spread
 HELIUM_LOCATIONS = [
-    {"city": "New York", "lat": 40.7128, "lng": -73.9960},
-    {"city": "Brooklyn", "lat": 40.6782, "lng": -73.9442},
-    {"city": "Los Angeles", "lat": 34.0522, "lng": -118.2437},
-    {"city": "San Francisco", "lat": 37.7749, "lng": -122.4194},
-    {"city": "London", "lat": 51.5074, "lng": -0.1278},
-    {"city": "Berlin", "lat": 52.5200, "lng": 13.4050},
-    {"city": "Tokyo", "lat": 35.6762, "lng": 139.6503},
-    {"city": "Sydney", "lat": -33.8688, "lng": 151.2093},
-    {"city": "Chicago", "lat": 41.8781, "lng": -87.6298},
-    {"city": "Miami", "lat": 25.7617, "lng": -80.1918},
-    {"city": "Seattle", "lat": 47.6062, "lng": -122.3321},
-    {"city": "Paris", "lat": 48.8566, "lng": 2.3522},
-    {"city": "Toronto", "lat": 43.6532, "lng": -79.3832},
-    {"city": "Singapore", "lat": 1.3521, "lng": 103.8198},
-    {"city": "Amsterdam", "lat": 52.3676, "lng": 4.9041},
-    {"city": "Denver", "lat": 39.7392, "lng": -104.9903},
-    {"city": "Austin", "lat": 30.2672, "lng": -97.7431},
-    {"city": "Melbourne", "lat": -37.8136, "lng": 144.9631},
+    # North America
+    {"city": "New York",       "lat": 40.7128, "lng":  -73.9960},
+    {"city": "Brooklyn",       "lat": 40.6782, "lng":  -73.9442},
+    {"city": "Los Angeles",    "lat": 34.0522, "lng": -118.2437},
+    {"city": "San Francisco",  "lat": 37.7749, "lng": -122.4194},
+    {"city": "Chicago",        "lat": 41.8781, "lng":  -87.6298},
+    {"city": "Miami",          "lat": 25.7617, "lng":  -80.1918},
+    {"city": "Seattle",        "lat": 47.6062, "lng": -122.3321},
+    {"city": "Denver",         "lat": 39.7392, "lng": -104.9903},
+    {"city": "Austin",         "lat": 30.2672, "lng":  -97.7431},
+    {"city": "Boston",         "lat": 42.3601, "lng":  -71.0589},
+    {"city": "Washington DC",  "lat": 38.9072, "lng":  -77.0369},
+    {"city": "Portland",       "lat": 45.5152, "lng": -122.6784},
+    {"city": "Atlanta",        "lat": 33.7490, "lng":  -84.3880},
+    {"city": "Phoenix",        "lat": 33.4484, "lng": -112.0740},
+    {"city": "Houston",        "lat": 29.7604, "lng":  -95.3698},
+    {"city": "Toronto",        "lat": 43.6532, "lng":  -79.3832},
+    {"city": "Vancouver",      "lat": 49.2827, "lng": -123.1207},
+    {"city": "Montreal",       "lat": 45.5017, "lng":  -73.5673},
+    {"city": "Mexico City",    "lat": 19.4326, "lng":  -99.1332},
+    # South America
+    {"city": "Bogotá",         "lat":  4.7110, "lng":  -74.0721},
+    {"city": "Lima",           "lat":-12.0464, "lng":  -77.0428},
+    {"city": "Santiago",       "lat":-33.4489, "lng":  -70.6693},
+    {"city": "Buenos Aires",   "lat":-34.6037, "lng":  -58.3816},
+    {"city": "São Paulo",      "lat":-23.5505, "lng":  -46.6333},
+    {"city": "Rio de Janeiro", "lat":-22.9068, "lng":  -43.1729},
+    # Europe
+    {"city": "London",         "lat": 51.5074, "lng":   -0.1278},
+    {"city": "Paris",          "lat": 48.8566, "lng":    2.3522},
+    {"city": "Berlin",         "lat": 52.5200, "lng":   13.4050},
+    {"city": "Amsterdam",      "lat": 52.3676, "lng":    4.9041},
+    {"city": "Barcelona",      "lat": 41.3851, "lng":    2.1734},
+    {"city": "Madrid",         "lat": 40.4168, "lng":   -3.7038},
+    {"city": "Rome",           "lat": 41.9028, "lng":   12.4964},
+    {"city": "Milan",          "lat": 45.4642, "lng":    9.1900},
+    {"city": "Vienna",         "lat": 48.2082, "lng":   16.3738},
+    {"city": "Warsaw",         "lat": 52.2297, "lng":   21.0122},
+    {"city": "Stockholm",      "lat": 59.3293, "lng":   18.0686},
+    {"city": "Dublin",         "lat": 53.3498, "lng":   -6.2603},
+    {"city": "Lisbon",         "lat": 38.7223, "lng":   -9.1393},
+    {"city": "Zurich",         "lat": 47.3769, "lng":    8.5417},
+    {"city": "Istanbul",       "lat": 41.0082, "lng":   28.9784},
+    # Africa / Middle East
+    {"city": "Cape Town",      "lat":-33.9249, "lng":   18.4241},
+    {"city": "Johannesburg",   "lat":-26.2041, "lng":   28.0473},
+    {"city": "Lagos",          "lat":  6.5244, "lng":    3.3792},
+    {"city": "Nairobi",        "lat": -1.2921, "lng":   36.8219},
+    {"city": "Cairo",          "lat": 30.0444, "lng":   31.2357},
+    {"city": "Dubai",          "lat": 25.2048, "lng":   55.2708},
+    {"city": "Tel Aviv",       "lat": 32.0853, "lng":   34.7818},
+    # Asia / Pacific
+    {"city": "Tokyo",          "lat": 35.6762, "lng":  139.6503},
+    {"city": "Osaka",          "lat": 34.6937, "lng":  135.5023},
+    {"city": "Seoul",          "lat": 37.5665, "lng":  126.9780},
+    {"city": "Singapore",      "lat":  1.3521, "lng":  103.8198},
+    {"city": "Bangkok",        "lat": 13.7563, "lng":  100.5018},
+    {"city": "Jakarta",        "lat": -6.2088, "lng":  106.8456},
+    {"city": "Manila",         "lat": 14.5995, "lng":  120.9842},
+    {"city": "Mumbai",         "lat": 19.0760, "lng":   72.8777},
+    {"city": "Delhi",          "lat": 28.6139, "lng":   77.2090},
+    {"city": "Bangalore",      "lat": 12.9716, "lng":   77.5946},
+    {"city": "Hong Kong",      "lat": 22.3193, "lng":  114.1694},
+    {"city": "Taipei",         "lat": 25.0330, "lng":  121.5654},
+    # Oceania
+    {"city": "Sydney",         "lat":-33.8688, "lng":  151.2093},
+    {"city": "Melbourne",      "lat":-37.8136, "lng":  144.9631},
+    {"city": "Auckland",       "lat":-36.8485, "lng":  174.7633},
 ]
 
 
@@ -58,10 +108,11 @@ def _generate_hotspot_name(seed: int) -> str:
 def _build_helium_nodes() -> list[dict]:
     """Build a set of realistic Helium hotspot demo entries."""
     nodes = []
-    # 18 hotspots, 3 will be offline
-    offline_indices = {4, 11, 15}
+    # ~18% offline, deterministic picks across the list
+    offline_indices = {4, 11, 15, 22, 28, 34, 41, 47, 53, 58}
 
-    for i in range(18):
+    total = len(HELIUM_LOCATIONS)
+    for i in range(total):
         loc = HELIUM_LOCATIONS[i]
         is_offline = i in offline_indices
         wallet_idx = i % len(DEMO_WALLETS)

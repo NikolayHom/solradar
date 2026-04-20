@@ -8,18 +8,36 @@ DEMO_WALLETS = [
     "Xr3mK7vQ9wL2fT5nJ8bA1hC6sP4dY0gEu",
 ]
 
-# Data center cities
+# Data-center cities — Tier-1 cloud/colo sites
 RENDER_LOCATIONS = [
-    {"city": "Ashburn, VA", "lat": 39.0438, "lng": -77.4874},
-    {"city": "Frankfurt", "lat": 50.1109, "lng": 8.6821},
-    {"city": "Singapore", "lat": 1.3521, "lng": 103.8198},
-    {"city": "Portland, OR", "lat": 45.5152, "lng": -122.6784},
-    {"city": "London", "lat": 51.5074, "lng": -0.1278},
-    {"city": "Tokyo", "lat": 35.6762, "lng": 139.6503},
-    {"city": "Amsterdam", "lat": 52.3676, "lng": 4.9041},
-    {"city": "Los Angeles", "lat": 34.0522, "lng": -118.2437},
-    {"city": "Dallas", "lat": 32.7767, "lng": -96.7970},
-    {"city": "Sydney", "lat": -33.8688, "lng": 151.2093},
+    # US
+    {"city": "Ashburn, VA",    "lat": 39.0438, "lng":  -77.4874},
+    {"city": "Portland, OR",   "lat": 45.5152, "lng": -122.6784},
+    {"city": "Los Angeles",    "lat": 34.0522, "lng": -118.2437},
+    {"city": "Dallas",         "lat": 32.7767, "lng":  -96.7970},
+    {"city": "Chicago",        "lat": 41.8781, "lng":  -87.6298},
+    {"city": "Atlanta",        "lat": 33.7490, "lng":  -84.3880},
+    {"city": "New York",       "lat": 40.7128, "lng":  -74.0060},
+    {"city": "San Jose",       "lat": 37.3382, "lng": -121.8863},
+    {"city": "Phoenix",        "lat": 33.4484, "lng": -112.0740},
+    # EU
+    {"city": "Frankfurt",      "lat": 50.1109, "lng":    8.6821},
+    {"city": "Amsterdam",      "lat": 52.3676, "lng":    4.9041},
+    {"city": "London",         "lat": 51.5074, "lng":   -0.1278},
+    {"city": "Paris",          "lat": 48.8566, "lng":    2.3522},
+    {"city": "Dublin",         "lat": 53.3498, "lng":   -6.2603},
+    {"city": "Stockholm",      "lat": 59.3293, "lng":   18.0686},
+    {"city": "Warsaw",         "lat": 52.2297, "lng":   21.0122},
+    # Asia / Pacific
+    {"city": "Tokyo",          "lat": 35.6762, "lng":  139.6503},
+    {"city": "Singapore",      "lat":  1.3521, "lng":  103.8198},
+    {"city": "Seoul",          "lat": 37.5665, "lng":  126.9780},
+    {"city": "Hong Kong",      "lat": 22.3193, "lng":  114.1694},
+    {"city": "Mumbai",         "lat": 19.0760, "lng":   72.8777},
+    {"city": "Sydney",         "lat":-33.8688, "lng":  151.2093},
+    # Rest
+    {"city": "Toronto",        "lat": 43.6532, "lng":  -79.3832},
+    {"city": "São Paulo",      "lat":-23.5505, "lng":  -46.6333},
 ]
 
 GPU_CONFIGS = [
@@ -37,9 +55,10 @@ def _build_render_nodes() -> list[dict]:
     """Build realistic Render Network GPU node entries."""
     random.seed(99)
     nodes = []
-    maintenance_idx = {6}
+    maintenance_idx = {6, 13, 19}
 
-    for i in range(10):
+    total = len(RENDER_LOCATIONS)
+    for i in range(total):
         loc = RENDER_LOCATIONS[i]
         is_maintenance = i in maintenance_idx
         wallet_idx = i % len(DEMO_WALLETS)

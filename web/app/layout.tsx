@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SiteHeader } from "@/components/SiteHeader";
+import { LiveTicker } from "@/components/LiveTicker";
 
 export const metadata: Metadata = {
-  title: "SolRadar — DePIN Analytics",
-  description: "Unified analytics for Solana DePIN networks",
+  title: "SolRadar — DePIN Fleet Telemetry",
+  description:
+    "Real on-chain telemetry for your Solana DePIN fleet. Helium, Hivemapper, Render — one radar. Free forever.",
 };
 
 export default function RootLayout({
@@ -13,29 +16,25 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-[#0a0a0f]">
-        <header className="border-b border-[#2a2a38] bg-[#111118] px-6 py-3">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-blue-500" />
-              <h1 className="text-lg font-semibold text-white tracking-tight">
-                SolRadar
-              </h1>
-              <span className="text-xs text-[#5a5a6e] ml-1">DePIN Analytics</span>
-            </div>
-            <nav className="flex gap-4 text-sm">
-              <a href="/" className="text-[#9898a8] hover:text-white transition-colors">
-                Dashboard
-              </a>
-              <a href="/nodes" className="text-[#9898a8] hover:text-white transition-colors">
-                Nodes
-              </a>
-            </nav>
-          </div>
-        </header>
-        <main className="max-w-7xl mx-auto px-6 py-6">
+      <body className="min-h-screen">
+        <div className="fixed inset-0 -z-10 deck-grid opacity-[0.35] pointer-events-none" />
+        <SiteHeader />
+        <LiveTicker />
+        <main className="max-w-[1180px] mx-auto px-6 py-10">
           {children}
         </main>
+        <footer className="border-t border-hair mt-24 py-10 px-6">
+          <div className="max-w-[1180px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-dimmer font-mono">
+            <div className="flex items-center gap-2">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-[color:var(--emerald)] blink" />
+              <span>100% free · no sign-up · no tracking · no API keys</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span>solradar // DePIN fleet telemetry</span>
+              <span className="text-aqua">v0.2</span>
+            </div>
+          </div>
+        </footer>
       </body>
     </html>
   );

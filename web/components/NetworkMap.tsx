@@ -1,6 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { geoNaturalEarth1, geoPath, geoGraticule10 } from "d3-geo";
+import { feature } from "topojson-client";
+import type { Feature, FeatureCollection, Geometry } from "geojson";
 
 interface MapNode {
   lat: number;
@@ -11,9 +14,9 @@ interface MapNode {
 }
 
 const PROTOCOL_COLORS: Record<string, string> = {
-  Helium: "#3b82f6",
-  Hivemapper: "#f97316",
-  Render: "#a855f7",
+  Helium: "#22d3ee",
+  Hivemapper: "#fb923c",
+  Render: "#a78bfa",
 };
 
 const STATUS_OPACITY: Record<string, number> = {
@@ -24,125 +27,194 @@ const STATUS_OPACITY: Record<string, number> = {
   Maintenance: 0.35,
 };
 
-// Simplified world map outline — continent shapes as SVG paths
-// Mercator-like projection: x = lng mapped to [0, 800], y = lat mapped to [0, 400]
-function projectToSvg(lat: number, lng: number): { x: number; y: number } {
-  const x = ((lng + 180) / 360) * 800;
-  const y = ((90 - lat) / 180) * 400;
-  return { x, y };
-}
+const VIEW_W = 820;
+const VIEW_H = 420;
 
-// Simplified continent outlines for a stylized world map
-const CONTINENT_PATHS = [
-  // North America
-  "M80,80 L130,60 L200,65 L230,80 L240,110 L220,140 L200,160 L180,170 L150,180 L120,160 L100,150 L80,120 Z",
-  // South America
-  "M160,190 L190,180 L210,200 L220,240 L210,280 L195,310 L180,330 L165,310 L155,270 L150,230 L155,200 Z",
-  // Europe
-  "M380,70 L420,60 L440,70 L450,80 L445,100 L430,110 L410,105 L390,100 L380,85 Z",
-  // Africa
-  "M380,120 L420,115 L450,130 L460,170 L450,220 L430,260 L410,270 L390,260 L380,220 L375,180 L378,140 Z",
-  // Asia
-  "M450,50 L520,40 L590,50 L640,60 L660,80 L650,110 L630,130 L600,140 L560,135 L520,130 L490,120 L470,110 L455,90 Z",
-  // Oceania / Australia
-  "M590,240 L640,230 L660,240 L665,265 L650,285 L620,290 L595,275 L585,255 Z",
-  // Japan / Islands
-  "M650,75 L658,70 L662,80 L655,90 L648,85 Z",
-  // Southeast Asia
-  "M580,150 L610,145 L625,155 L620,175 L600,185 L585,175 Z",
-  // Greenland
-  "M250,35 L290,30 L305,40 L300,55 L280,60 L255,50 Z",
-];
+export function NetworkMap({ nodes, radar = false }: { nodes: MapNode[]; radar?: boolean }) {
+  const [countries, setCountries] = useState<Feature<Geometry>[] | null>(null);
 
-export function NetworkMap({ nodes }: { nodes: MapNode[] }) {
+  useEffect(() => {
+    let alive = true;
+    fetch("/world-110m.json")
+      .then((r) => r.json())
+      .then((topo) => {
+        if (!alive) return;
+        const fc = feature(topo, topo.objects.countries) as unknown as FeatureCollection;
+        setCountries(fc.features);
+      })
+      .catch(() => setCountries([]));
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const projection = useMemo(
+    () =>
+      geoNaturalEarth1()
+        .scale(155)
+        .translate([VIEW_W / 2, VIEW_H / 2 + 10]),
+    []
+  );
+
+  const pathGen = useMemo(() => geoPath(projection), [projection]);
+  const graticulePath = useMemo(() => pathGen(geoGraticule10()) ?? "", [pathGen]);
+  const spherePath = useMemo(() => pathGen({ type: "Sphere" } as any) ?? "", [pathGen]);
+
+  const countryPaths = useMemo(() => {
+    if (!countries) return [];
+    return countries
+      .map((f, i) => ({ id: (f.id as string) ?? String(i), d: pathGen(f) ?? "" }))
+      .filter((c) => c.d.length > 0);
+  }, [countries, pathGen]);
+
   const dotsByProtocol = useMemo(() => {
-    const grouped: Record<string, { x: number; y: number; status: string; node_id: string }[]> = {};
+    const grouped: Record<
+      string,
+      { x: number; y: number; status: string; node_id: string }[]
+    > = {};
     for (const nd of nodes) {
+      const projected = projection([nd.lng, nd.lat]);
+      if (!projected) continue;
+      const [x, y] = projected;
       const proto = nd.protocol;
       if (!grouped[proto]) grouped[proto] = [];
-      const { x, y } = projectToSvg(nd.lat, nd.lng);
       grouped[proto].push({ x, y, status: nd.status, node_id: nd.node_id || "" });
     }
     return grouped;
-  }, [nodes]);
+  }, [nodes, projection]);
 
   const legendEntries = Object.keys(PROTOCOL_COLORS).filter(
     (p) => dotsByProtocol[p] && dotsByProtocol[p].length > 0
   );
 
   return (
-    <div className="border border-[#2a2a38] rounded-lg bg-[#111118] p-4">
+    <div className={radar ? "" : "border border-[#2a2a38] rounded-lg bg-[#111118] p-4"}>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-medium text-[#9898a8]">Global Node Map</h3>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[color:var(--aqua,#22d3ee)]">
+            ◉ sweeping
+          </span>
+          <span className="text-[10px] font-mono text-[color:var(--text-3,#5a6478)]">
+            {nodes.length} signals
+          </span>
+        </div>
         <div className="flex items-center gap-3">
           {legendEntries.map((proto) => (
             <div key={proto} className="flex items-center gap-1.5">
               <span
-                className="inline-block w-2.5 h-2.5 rounded-full"
+                className="inline-block w-2 h-2 rounded-full"
                 style={{ backgroundColor: PROTOCOL_COLORS[proto] }}
               />
-              <span className="text-[10px] text-[#5a5a6e]">
-                {proto} ({dotsByProtocol[proto]?.length ?? 0})
+              <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-[color:var(--text-3,#5a6478)]">
+                {proto} · {dotsByProtocol[proto]?.length ?? 0}
               </span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="relative rounded bg-[#0a0a0f] border border-[#1a1a24] overflow-hidden">
+      <div className="relative rounded-lg bg-[#05070f] border border-[rgba(34,211,238,0.18)] overflow-hidden">
         <svg
-          viewBox="0 0 800 400"
+          viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
           className="w-full h-auto"
-          style={{ minHeight: 220 }}
+          style={{ minHeight: 240 }}
         >
-          {/* Background grid lines for visual texture */}
-          {Array.from({ length: 9 }, (_, i) => (
-            <line
-              key={`vg-${i}`}
-              x1={(i + 1) * 80}
-              y1={0}
-              x2={(i + 1) * 80}
-              y2={400}
-              stroke="#1a1a24"
-              strokeWidth={0.5}
-            />
-          ))}
-          {Array.from({ length: 4 }, (_, i) => (
-            <line
-              key={`hg-${i}`}
-              x1={0}
-              y1={(i + 1) * 80}
-              x2={800}
-              y2={(i + 1) * 80}
-              stroke="#1a1a24"
-              strokeWidth={0.5}
-            />
-          ))}
-
-          {/* Continent outlines */}
-          {CONTINENT_PATHS.map((d, idx) => (
-            <path
-              key={`continent-${idx}`}
-              d={d}
-              fill="#1a1a24"
-              stroke="#2a2a38"
-              strokeWidth={0.8}
-            />
-          ))}
-
-          {/* Pulsing animation definitions */}
           <defs>
+            <radialGradient id="ocean-grad" cx="50%" cy="45%" r="75%">
+              <stop offset="0%" stopColor="#0a1426" />
+              <stop offset="100%" stopColor="#05070f" />
+            </radialGradient>
+            <radialGradient id="radar-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.12" />
+              <stop offset="60%" stopColor="#22d3ee" stopOpacity="0.03" />
+              <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
+            </radialGradient>
+            <linearGradient id="sweep-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#22d3ee" stopOpacity="0" />
+              <stop offset="60%" stopColor="#22d3ee" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.8" />
+            </linearGradient>
             <style>{`
               @keyframes nodePulse {
-                0% { r: 4; opacity: 0.9; }
-                50% { r: 7; opacity: 0.4; }
+                0%   { r: 4; opacity: 0.9; }
+                50%  { r: 7; opacity: 0.4; }
                 100% { r: 4; opacity: 0.9; }
               }
-              .node-pulse {
-                animation: nodePulse 2s ease-in-out infinite;
+              .node-pulse { animation: nodePulse 2s ease-in-out infinite; }
+              @keyframes svgSweep {
+                from { transform: rotate(0deg); }
+                to   { transform: rotate(360deg); }
+              }
+              .map-sweep {
+                transform-origin: ${VIEW_W / 2}px ${VIEW_H / 2 + 10}px;
+                animation: svgSweep 9s linear infinite;
               }
             `}</style>
           </defs>
+
+          {/* Sphere (ocean) */}
+          <path d={spherePath} fill="url(#ocean-grad)" stroke="rgba(34,211,238,0.15)" strokeWidth={0.6} />
+
+          {/* Radial glow from center */}
+          {radar && (
+            <circle
+              cx={VIEW_W / 2}
+              cy={VIEW_H / 2 + 10}
+              r={Math.max(VIEW_W, VIEW_H) / 2}
+              fill="url(#radar-glow)"
+            />
+          )}
+
+          {/* Graticule (lat/lng grid) */}
+          <path
+            d={graticulePath}
+            fill="none"
+            stroke="rgba(34,211,238,0.08)"
+            strokeWidth={0.4}
+            strokeDasharray="1.5 2"
+          />
+
+          {/* Countries */}
+          {countryPaths.map((c) => (
+            <path
+              key={c.id}
+              d={c.d}
+              fill="#0e1830"
+              stroke="rgba(34,211,238,0.18)"
+              strokeWidth={0.5}
+              strokeLinejoin="round"
+            />
+          ))}
+
+          {/* Radar sweep wedge */}
+          {radar && (
+            <g className="map-sweep" opacity={0.5}>
+              <path
+                d={`M ${VIEW_W / 2} ${VIEW_H / 2 + 10} L ${VIEW_W / 2 + 500} ${VIEW_H / 2 + 10} A 500 500 0 0 0 ${
+                  VIEW_W / 2 + 500 * Math.cos(-Math.PI / 3)
+                } ${VIEW_H / 2 + 10 + 500 * Math.sin(-Math.PI / 3)} Z`}
+                fill="url(#sweep-grad)"
+              />
+            </g>
+          )}
+
+          {/* Concentric range rings */}
+          {radar && (
+            <g opacity={0.22}>
+              {[80, 140, 200].map((r) => (
+                <circle
+                  key={r}
+                  cx={VIEW_W / 2}
+                  cy={VIEW_H / 2 + 10}
+                  r={r}
+                  fill="none"
+                  stroke="#22d3ee"
+                  strokeWidth={0.4}
+                  strokeDasharray="2 3"
+                />
+              ))}
+            </g>
+          )}
 
           {/* Node dots */}
           {Object.entries(dotsByProtocol).map(([proto, dots]) =>
@@ -152,7 +224,15 @@ export function NetworkMap({ nodes }: { nodes: MapNode[] }) {
               const isActive = opacity > 0.5;
               return (
                 <g key={`${proto}-${idx}`}>
-                  {/* Pulse ring for active nodes */}
+                  {isActive && (
+                    <circle
+                      cx={dot.x}
+                      cy={dot.y}
+                      r={6}
+                      fill={color}
+                      opacity={0.12}
+                    />
+                  )}
                   {isActive && (
                     <circle
                       cx={dot.x}
@@ -160,52 +240,43 @@ export function NetworkMap({ nodes }: { nodes: MapNode[] }) {
                       r={4}
                       fill="none"
                       stroke={color}
-                      strokeWidth={1.5}
-                      opacity={0.3}
+                      strokeWidth={1.3}
+                      opacity={0.35}
                       className="node-pulse"
                       style={{ animationDelay: `${idx * 0.15}s` }}
                     />
                   )}
-                  {/* Solid dot */}
                   <circle
                     cx={dot.x}
                     cy={dot.y}
-                    r={isActive ? 3.5 : 2.5}
+                    r={isActive ? 3.2 : 2.3}
                     fill={color}
                     opacity={opacity}
                   />
-                  {/* Glow effect for active */}
-                  {isActive && (
-                    <circle
-                      cx={dot.x}
-                      cy={dot.y}
-                      r={6}
-                      fill={color}
-                      opacity={0.1}
-                    />
-                  )}
                 </g>
               );
             })
           )}
         </svg>
+
+        {!countries && (
+          <div className="absolute inset-0 flex items-center justify-center text-[10px] text-[#5a5a6e]">
+            loading map…
+          </div>
+        )}
       </div>
 
-      {/* Summary stats bar */}
       <div className="flex justify-between mt-3 text-[10px] text-[#5a5a6e]">
         <span>{nodes.length} total nodes</span>
         <span>
           {nodes.filter((n) => ["Online", "Active"].includes(n.status)).length} active
         </span>
-        <span>
-          {new Set(nodes.map((n) => n.protocol)).size} networks
-        </span>
+        <span>{new Set(nodes.map((n) => n.protocol)).size} networks</span>
       </div>
     </div>
   );
 }
 
-// Keep the placeholder export for backward compatibility
 export function NetworkMapPlaceholder() {
   return <NetworkMap nodes={[]} />;
 }

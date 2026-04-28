@@ -4,11 +4,31 @@ Unified telemetry console for DePIN networks on Solana. Paste any wallet — we 
 
 ## Supported Networks
 
-| Network     | Real telemetry                                    | Data source                                   |
-|-------------|---------------------------------------------------|-----------------------------------------------|
-| Helium      | Hotspot NFTs + H3 location + HNT/IOT/MOBILE flows | Helius DAS + RPC                              |
-| Hivemapper  | HONEY balance + reward inflows                    | Solana RPC (per-driver GPS not public)        |
-| Render      | RNDR balance + inflows + regional pools           | Solana RPC (GPU node geo not public)          |
+| Network     | Coverage  | Real telemetry                                    | Data source                                   |
+|-------------|-----------|---------------------------------------------------|-----------------------------------------------|
+| Helium      | live      | Hotspot NFTs + H3 location + HNT/IOT/MOBILE flows | Helius DAS + RPC + enhanced-tx                |
+| Hivemapper  | live      | HONEY balance + reward inflows                    | Solana RPC (per-driver GPS not public)        |
+| Render      | live      | RNDR balance + inflows + regional pools           | Solana RPC (GPU node geo not public)          |
+| Nosana      | planned   | Job queue + worker uptime aggregates              | Solana RPC + Nosana indexer (when public)     |
+| io.net      | planned   | GPU device count + price tier distribution        | io.net public API (rate-limited)              |
+| GRASS       | exploring | Bandwidth-share rewards by IP region              | Off-chain (need partner agreement)            |
+| WeatherXM   | planned   | Station readings (PM, temp, humidity)             | WeatherXM public API + on-chain attestations  |
+| DIMO        | exploring | Vehicle telemetry rollups                         | DIMO Network endpoints                        |
+| Geodnet     | planned   | RTK reference station uptime                      | Geodnet API + on-chain reward claims          |
+
+## Metric Definitions
+
+We aggregate three things and label every number with how we got it:
+
+| Metric            | What it means                                   | Tag      |
+|-------------------|-------------------------------------------------|----------|
+| `node_uptime`     | % of last 24h where the node reported data     | `on-chain` (Helium) / `aggregate` (Hivemapper / Render) |
+| `earnings_24h`    | Token rewards observed in the wallet window    | `on-chain` (all networks) |
+| `hex_id`          | H3 cell at resolution `r` for hotspot location | `on-chain` (Helium) / `region` (others) |
+| `h3_resolution`   | H3 grid level — 7 (city block) is the default  | always `on-chain` |
+| `network_coverage`| Region-level rollup we compute                 | `aggregate` |
+
+Anything we cannot derive on-chain is tagged `demo` and only used in seeded mode.
 
 ## Coming Soon
 

@@ -7,6 +7,16 @@ export const metadata: Metadata = {
   title: "SolRadar — DePIN Fleet Telemetry",
   description:
     "Real on-chain telemetry for your Solana DePIN fleet. Helium, Hivemapper, Render — one radar. Free forever.",
+  openGraph: {
+    title: "SolRadar · DePIN Fleet Telemetry",
+    description: "Helium, Hivemapper, Render — one radar.",
+    type: "website",
+    images: ["/og.svg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og.svg"],
+  },
 };
 
 export default function RootLayout({

@@ -93,4 +93,8 @@ Known-good Solana wallets for smoke-testing the `/live` endpoint:
 
 ## License
 
-MIT
+| Scope                          | Terms                                |
+|--------------------------------|--------------------------------------|
+| Code (this repo)               | MIT — see [LICENSE](LICENSE)         |
+| DePIN partner names + logos    | belong to their networks (registry in `web/lib/partners.ts`) |
+| Seeded node snapshots          | demo-tagged, not redistribution-grade |

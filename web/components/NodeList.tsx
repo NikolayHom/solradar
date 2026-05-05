@@ -31,8 +31,14 @@ export function NodeList({ nodeList }: { nodeList: NodeData[] }) {
               <th className="text-left px-4 py-2 font-medium">Protocol</th>
               <th className="text-left px-4 py-2 font-medium">Status</th>
               <th className="text-right px-4 py-2 font-medium">Uptime 24h</th>
-              <th className="text-right px-4 py-2 font-medium">Earned 24h</th>
-              <th className="text-right px-4 py-2 font-medium">Earned 30d</th>
+              <th
+                className="text-right px-4 py-2 font-medium"
+                title="USD value of token rewards received in the last 24 hours, priced at the time of the reward transfer."
+              >Earned 24h</th>
+              <th
+                className="text-right px-4 py-2 font-medium"
+                title="Helium: rolling 30-day on-chain HNT/IOT/MOBILE inflows. Hivemapper / Render: 30-day reward inflows from the protocol vault. Values are priced in USD using the spot rate at receipt — they do not reflect current token value."
+              >Earned 30d</th>
             </tr>
           </thead>
           <tbody>

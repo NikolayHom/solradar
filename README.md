@@ -2,6 +2,12 @@
 
 Unified telemetry console for DePIN networks on Solana. Paste any wallet — we scan on-chain for Helium hotspots (with real H3-decoded locations), token balances, and reward flows across Helium, Hivemapper, and Render. Free, no sign-up, no API keys.
 
+**Live console:** https://depin-radar.vercel.app — read-only, no wallet required to browse seeded snapshots.
+
+| networks live | networks planned | data backbone |
+|---------------|------------------|---------------|
+| 3             | 6                | Helius DAS + RPC + enhanced-tx |
+
 ## Supported Networks
 
 | Network     | Coverage  | Real telemetry                                    | Data source                                   |

@@ -2,29 +2,193 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Chivo+Mono:wght@400;500;600&display=swap');
 
 :root {
-  --bg-primary: #0a0a0f;
-  --bg-card: #111118;
-  --bg-elevated: #1a1a24;
-  --border: #2a2a38;
-  --text-primary: #e8e8f0;
-  --text-secondary: #9898a8;
-  --text-muted: #5a5a6e;
-  --accent-blue: #3b82f6;
-  --accent-green: #22c55e;
-  --accent-orange: #f97316;
-  --accent-purple: #a855f7;
+  /* Satellite-telemetry palette */
+  --ink: #05070f;
+  --ink-2: #0a0f1c;
+  --ink-3: #121a2e;
+  --hair: rgba(140, 170, 220, 0.08);
+  --hair-hot: rgba(34, 211, 238, 0.28);
+  --text: #e7ecf3;
+  --text-2: #9aa3b2;
+  --text-3: #5a6478;
+  --aqua: #22d3ee;
+  --aqua-deep: #0891b2;
+  --coral: #fb7185;
+  --emerald: #34d399;
+  --amber: #fbbf24;
+  --violet: #a78bfa;
+}
+
+html, body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: 'Instrument Sans', system-ui, sans-serif;
+  background:
+    radial-gradient(ellipse at 10% -10%, rgba(34, 211, 238, 0.06), transparent 55%),
+    radial-gradient(ellipse at 110% 120%, rgba(251, 113, 133, 0.05), transparent 50%),
+    var(--ink);
+  min-height: 100vh;
 }
 
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+.font-serif { font-family: 'Instrument Serif', Georgia, serif; }
+.font-mono  { font-family: 'Chivo Mono', ui-monospace, monospace; }
+
+* { scrollbar-width: thin; scrollbar-color: var(--hair) transparent; }
+
+/* ===== Hairline grid background (subtle "deck-blueprint" texture) ===== */
+.deck-grid {
+  background-image:
+    linear-gradient(to right, var(--hair) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--hair) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
+
+/* ===== Frosted panel ===== */
+.panel {
+  background: linear-gradient(180deg, rgba(18, 26, 46, 0.6), rgba(10, 15, 28, 0.6));
+  border: 1px solid var(--hair);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 14px;
+}
+.panel-hot {
+  border-color: var(--hair-hot);
+  box-shadow:
+    0 0 0 1px rgba(34, 211, 238, 0.1) inset,
+    0 12px 48px -24px rgba(34, 211, 238, 0.4);
+}
+
+/* Corner markers ("targeting reticle" style) */
+.reticle {
+  position: relative;
+}
+.reticle::before, .reticle::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--aqua);
+  opacity: 0.55;
+}
+.reticle::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+.reticle::after  { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+/* ===== Radar sweep (used inside NetworkMap) ===== */
+@keyframes radarSweep {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.radar-sweep {
+  animation: radarSweep 9s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes signalPing {
+  0%   { transform: scale(0.5); opacity: 0.9; }
+  80%  { transform: scale(2.6); opacity: 0; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+.signal-ping { animation: signalPing 2.4s cubic-bezier(0.2, 0.7, 0.3, 1) infinite; transform-origin: center; }
+
+/* ===== Counter shimmer ===== */
+@keyframes shimmerSlide {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer-text {
+  background: linear-gradient(90deg, var(--text) 0%, var(--aqua) 30%, var(--text) 60%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmerSlide 6s linear infinite;
+}
+
+/* ===== Live ticker marquee ===== */
+@keyframes tickerSlide {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+.ticker-track {
+  animation: tickerSlide 42s linear infinite;
+  display: inline-flex;
+  gap: 2.5rem;
+  padding-right: 2.5rem;
+  white-space: nowrap;
+}
+
+/* ===== Subtle scanline overlay ===== */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.015) 0,
+    rgba(255, 255, 255, 0.015) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ===== Blink for telemetry dots ===== */
+@keyframes telemetryBlink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+.blink { animation: telemetryBlink 1.4s ease-in-out infinite; }
+
+/* ===== Hero title underline sweep ===== */
+@keyframes sweepUnderline {
+  0%   { transform: scaleX(0); transform-origin: left; }
+  50%  { transform: scaleX(1); transform-origin: left; }
+  50.01% { transform: scaleX(1); transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
+}
+.sweep-underline::after {
+  content: "";
+  display: block;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--aqua), transparent);
+  transform: scaleX(0);
+  animation: sweepUnderline 5s ease-in-out infinite 1s;
+}
+
+/* Utility colors */
+.text-aqua   { color: var(--aqua); }
+.text-coral  { color: var(--coral); }
+.text-emerald2 { color: var(--emerald); }
+.text-dim    { color: var(--text-2); }
+.text-dimmer { color: var(--text-3); }
+.border-hair { border-color: var(--hair); }
+.border-aqua { border-color: var(--hair-hot); }
+.bg-ink      { background: var(--ink); }
+.bg-ink-2    { background: var(--ink-2); }
+
+/* Gradient button */
+.btn-hot {
+  background: linear-gradient(135deg, var(--aqua) 0%, var(--aqua-deep) 100%);
+  color: #02131a;
+  font-weight: 600;
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+.btn-hot:hover {
+  box-shadow: 0 10px 40px -10px rgba(34, 211, 238, 0.5);
+  transform: translateY(-1px);
+}
+.btn-ghost {
+  border: 1px solid var(--hair-hot);
+  color: var(--aqua);
+  background: transparent;
+  transition: background 180ms ease;
+}
+.btn-ghost:hover { background: rgba(34, 211, 238, 0.08); }

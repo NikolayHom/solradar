@@ -7,11 +7,16 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Load shared env BEFORE importing anything that reads HELIUS_API_KEY
-_SHARED_ENV = Path(__file__).resolve().parents[3] / ".env.shared"
-if _SHARED_ENV.exists():
-    load_dotenv(_SHARED_ENV)
-load_dotenv(Path(__file__).resolve().parent / ".env", override=False)
+# Load shared env BEFORE importing anything that reads HELIUS_API_KEY.
+# In Railway containers the file lives outside the deploy root, so guard
+# against shorter parent chains and skip cleanly when the file isn't present.
+_resolved = Path(__file__).resolve()
+_parents = list(_resolved.parents)
+if len(_parents) > 3:
+    _shared_env = _parents[3] / ".env.shared"
+    if _shared_env.exists():
+        load_dotenv(_shared_env)
+load_dotenv(_resolved.parent / ".env", override=False)
 
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware

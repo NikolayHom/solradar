@@ -1,7 +1,18 @@
 """SolRadar API — DePIN analytics hub."""
 
+import os
 import time
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# Load shared env BEFORE importing anything that reads HELIUS_API_KEY
+_SHARED_ENV = Path(__file__).resolve().parents[3] / ".env.shared"
+if _SHARED_ENV.exists():
+    load_dotenv(_SHARED_ENV)
+load_dotenv(Path(__file__).resolve().parent / ".env", override=False)
+
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select, func
@@ -12,6 +23,7 @@ from db.models import DePINNode, ProtocolMetrics
 from collectors.helium_collector import fetch_helium_stats
 from collectors.hivemapper_collector import fetch_hivemapper_stats
 from collectors.render_collector import fetch_render_stats
+from collectors import onchain_live, helius_client, demo_snapshot
 
 # Protocol-level defaults for fallback and seed enrichment
 PROTOCOL_DEFAULTS = {
@@ -271,6 +283,100 @@ async def compare_protocols(wallet: str, db: AsyncSession = Depends(get_session)
             comparison[proto]["avg_uptime"] /= cnt
 
     return {"wallet": wallet, "comparison": comparison}
+
+
+# --- Live on-chain wallet endpoint ----------------------------------------
+_LIVE_CACHE: dict[str, tuple[float, dict]] = {}
+_LIVE_TTL_SEC = 120
+
+
+@app.get("/api/wallet/{wallet}/live")
+async def wallet_live(wallet: str, debug: int = 0):
+    """Return real on-chain DePIN snapshot for a wallet.
+
+    Uses Helius DAS + RPC + enhanced-tx. Results are cached for 2 min.
+    Response includes `provenance` so the UI can distinguish real vs fallback.
+    """
+    now = time.time()
+
+    # Demo wallet short-circuit — returns synthesized snapshot with source="demo".
+    if demo_snapshot.is_demo(wallet):
+        response = demo_snapshot.build_demo_snapshot(wallet)
+        return response
+
+    if not helius_client.has_key():
+        raise HTTPException(
+            status_code=503,
+            detail="HELIUS_API_KEY not configured — live mode unavailable",
+        )
+
+    cached = _LIVE_CACHE.get(wallet)
+    if cached and (now - cached[0]) < _LIVE_TTL_SEC:
+        return {**cached[1], "cached": True, "age_sec": int(now - cached[0])}
+
+    try:
+        snap = await onchain_live.snapshot_wallet(wallet)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"on-chain lookup failed: {e}")
+
+    nodes: list[dict] = list(snap["hotspots"]) + list(snap["render_regions"])
+    protocols = []
+    for name in ("Helium", "Hivemapper", "Render"):
+        s = snap["summary"][name]
+        protocols.append(
+            {
+                "name": name,
+                "node_count": s["node_count"],
+                "active_count": s["active_count"],
+                "balances": s["balances"],
+                "earnings_24h": s["earnings_24h"],
+                "earnings_30d": s["earnings_30d"],
+                "has_activity": s["has_activity"],
+                "source": s["source"],
+            }
+        )
+
+    response = {
+        "wallet": wallet,
+        "mode": "live" if snap["has_any_activity"] else "empty",
+        "has_any_activity": snap["has_any_activity"],
+        "nodes": nodes,
+        "protocols": protocols,
+        "rewards": snap["rewards"],
+        "asset_count": snap.get("asset_count", 0),
+        "provenance": {
+            "rpc": "helius-mainnet",
+            "helium_nodes": "das_compressed_nft",
+            "locations": "h3_on_chain",
+            "earnings": "enhanced_tx",
+            "render_locations": "region_aggregate",
+            "hivemapper_locations": "not_public_per_wallet",
+        },
+        "cached": False,
+    }
+    if debug:
+        try:
+            raw = await helius_client.das_assets_by_owner(wallet, limit=20)
+            items = (raw or {}).get("items", [])[:15]
+            response["_debug"] = {
+                "sample_assets": [
+                    {
+                        "id": a.get("id"),
+                        "symbol": a.get("content", {}).get("metadata", {}).get("symbol"),
+                        "name": a.get("content", {}).get("metadata", {}).get("name"),
+                        "grouping": a.get("grouping", []),
+                        "attr_keys": [
+                            x.get("trait_type") for x in
+                            a.get("content", {}).get("metadata", {}).get("attributes", []) or []
+                        ],
+                    }
+                    for a in items
+                ],
+            }
+        except Exception as e:
+            response["_debug"] = {"error": str(e)}
+    _LIVE_CACHE[wallet] = (now, response)
+    return response
 
 
 @app.post("/api/collect/{protocol}")

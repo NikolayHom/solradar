@@ -20,16 +20,21 @@ interface UserEarnings {
   >;
 }
 
-const BAR_COLORS = ["#3b82f6", "#f97316", "#a855f7", "#22c55e"];
+const PROTOCOL_BAR_COLORS: Record<string, string> = {
+  Helium: "#22d3ee",
+  Hivemapper: "#fb923c",
+  Render: "#a78bfa",
+};
+const FALLBACK_BAR = "#34d399";
 
 export function EarningsChart({ earningsData }: { earningsData: UserEarnings }) {
   const chartEntries = Object.entries(earningsData.protocols).map(
-    ([protocolName, protocolStats], idx) => ({
+    ([protocolName, protocolStats]) => ({
       name: protocolName,
       "24h": protocolStats.earnings_24h,
       "30d": protocolStats.earnings_30d,
       nodes: protocolStats.node_count,
-      fill: BAR_COLORS[idx % BAR_COLORS.length],
+      fill: PROTOCOL_BAR_COLORS[protocolName] ?? FALLBACK_BAR,
     })
   );
 

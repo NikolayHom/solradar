@@ -55,7 +55,7 @@ Nosana · io.net · GRASS · WeatherXM · DIMO · Geodnet
 3. H3 cells decode to lat/lng for Helium hotspots
 4. UI renders verified snapshot with source badges
 
-## Stack
+## Data pipeline
 
 | Layer     | Tech                                                 |
 |-----------|------------------------------------------------------|

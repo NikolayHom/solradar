@@ -141,13 +141,6 @@ export function NetworkMap({ nodes, radar = false }: { nodes: MapNode[]; radar?:
                 100% { r: 4; opacity: 0.9; }
               }
               .node-pulse { animation: nodePulse 2s ease-in-out infinite; }
-              /* Slower transitions when a node is hovered or selected — the
-                 prior 200ms felt jumpy when the user nudged across a cluster.
-                 400ms cubic-bezier reads as a "camera ease" instead. */
-              .node-pulse, .node-static {
-                transition: r 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-                            opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-              }
               @keyframes svgSweep {
                 from { transform: rotate(0deg); }
                 to   { transform: rotate(360deg); }
